@@ -1,0 +1,15 @@
+# Development Dockerfile for Base44 sandbox.
+# Pre-caches Maven dependencies and compiled artifacts so the bind-mounted
+# source rebuilds quickly at container startup. Source is bind-mounted at
+# runtime (see docker-compose.base44.yml) so edits are reflected on rebuild.
+FROM maven:3.9-eclipse-temurin-8
+
+RUN apt-get update && apt-get install -y --no-install-recommends curl && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+# Copy source and build all active modules (caches .m2 + compiles)
+COPY . .
+RUN mvn install -DskipTests -B -T 2
+
+EXPOSE 48080
